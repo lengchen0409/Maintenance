@@ -1,0 +1,21 @@
+#server:
+#  port: 20212
+#spring:
+#    profiles:
+#      active: dev
+##spring:
+##  application:
+##    name: I2dspMaintenanceRecord
+##  cloud:
+##    nacos:
+##      discovery:
+##        server-addr: 210.5.30.195:8848
+##        namespace: cc8561c5-2d87-4db8-95fc-ddc0fb03e563
+##      config:
+##        #        enabled: false
+##        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+##        namespace: ${spring.cloud.nacos.discovery.namespace}
+##        file-extension: yaml
+##        prefix: I2dspMaintenanceRecord
+##  profiles:
+##    active: test

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.i2dsp.maintenance.mapper.MaintenanceRecordMapper">
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.i2dsp.maintenance.domain.MaintenanceRecord">
+        <id column="record_id" property="recordId" />
+        <result column="device_id" property="deviceId" />
+        <result column="type_id" property="typeId" />
+        <result column="is_abnormal" property="isAbnormal" />
+        <result column="remark" property="remark" />
+        <result column="staff_name" property="staffName" />
+        <result column="staff_phone" property="staffPhone" />
+        <result column="create_user" property="createUser" />
+        <result column="gmt_create" property="gmtCreate" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        record_id, device_id, type_id, is_abnormal, remark, staff_name, staff_phone, create_user, gmt_create
+    </sql>
+
+    <!--    =====================    一对多查询 start    =====================================-->
+    <select id="searchMaintenancesByAll" resultMap="MaintenanceRecordAndDetailAndPhotoResultMap"
+            parameterType="com.i2dsp.maintenance.domain.dto.MaintenanceRecordDto">
+        SELECT
+        mr.*
+        FROM
+        maintenance_record mr
+        LEFT JOIN maintenance_record_detail mrd on
+        mr.record_id = mrd.record_id
+        LEFT JOIN maintenance_photo mp on
+        mrd.record_detail_id = mp.record_detail_id
+        <where>
+            <if test="recordId != null and recordId != ''">
+                and mr.record_id like concat(#{recordId}, '%')
+            </if>
+            <if test="deviceId != null and deviceId != ''">
+                and mr.device_id like concat(#{deviceId}, '%')
+            </if>
+            <if test="typeId != null and typeId != ''">
+                and mr.type_id like concat(#{typeId}, '%')
+            </if>
+            <if test="isAbnormal != null">
+                and mr.is_abnormal = #{isAbnormal}
+            </if>
+            <if test="remark != null and remark != ''">
+                and mr.remark like concat('%', #{remark}, '%')
+            </if>
+            <if test="staffName != null and staffName != ''">
+                and mr.staff_name like concat('%', #{staffName}, '%')
+            </if>
+            <if test="staffPhone != null and staffPhone != ''">
+                and mr.staff_phone like concat(#{staffPhone}, '%')
+            </if>
+            <if test="checkStatus != null" >
+                and mrd.check_status = #{checkStatus}
+            </if>
+            <if test="contentId != null and contentId != ''">
+                and mrd.content_id like concat(#{contentId}, '%')
+            </if>
+        </where>
+        group BY mr.record_id
+        ORDER BY mr.gmt_create
+    </select>
+    <resultMap id="MaintenanceRecordAndDetailAndPhotoResultMap" type="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndDetailAndPhotoVo"
+               extends="BaseResultMap">
+            <!--        通过此ID为主键查询-->
+            <collection property="maintenanceRecordDetailList" ofType="com.i2dsp.maintenance.domain.MaintenanceRecordDetail"
+                        javaType="java.util.List"
+                        column="record_id" select="searchMaintenanceRecordDetailById">
+                <!--     该id为主键-->
+                <id column="record_detail_id" property="recordDetailId"/>
+                <result column="record_id" property="recordId"/>
+                <result column="content_id" property="contentId"/>
+                <result column="check_status" property="checkStatus"/>
+                <result column="remark" property="remark"/>
+            </collection>
+            <collection property="maintenanceTypeList" ofType="com.i2dsp.maintenance.domain.MaintenanceType"
+                        javaType="java.util.List"
+                        column="type_id" select="searchMaintenanceTypeById">
+                <id column="type_id" property="typeId"/>
+                <result column="type_name" property="typeName"/>
+                <result column="period_scope" property="periodScope"/>
+                <result column="period_number" property="periodNumber"/>
+                <result column="remind_number" property="remindNumber"/>
+                <result column="description" property="description"/>
+                <result column="is_deleted" property="isDeleted"/>
+                <result column="create_user_id" property="createUserId"/>
+                <result column="gmt_create" property="gmtCreate"/>
+                <result column="gmt_modified" property="gmtModified"/>
+            </collection>
+    </resultMap>
+    <select id="searchMaintenanceTypeById" parameterType="java.lang.Long" resultMap="TypeTemplate">
+        select
+        *
+        from maintenance_type where type_id = #{type_id}
+    </select>
+    <resultMap id="TypeTemplate" type="com.i2dsp.maintenance.domain.MaintenanceType">
+        <id column="type_id" property="typeId"/>
+        <result column="type_name" property="typeName"/>
+        <result column="period_scope" property="periodScope"/>
+        <result column="period_number" property="periodNumber"/>
+        <result column="remind_number" property="remindNumber"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+    <select id="searchMaintenanceRecordDetailById" parameterType="java.lang.Long" resultMap="RecordDetailTemplate">
+        select
+        *
+        from maintenance_record_detail where record_id = #{record_id}
+    </select>
+    <resultMap id="RecordDetailTemplate" type="com.i2dsp.maintenance.domain.MaintenanceRecordDetail">
+        <id column="record_detail_id" property="recordDetailId"/>
+        <result column="record_id" property="recordId"/>
+        <result column="content_id" property="contentId"/>
+        <result column="check_status" property="checkStatus"/>
+        <result column="remark" property="remark"/>
+        <collection property="maintenanceContentList" ofType="com.i2dsp.maintenance.domain.MaintenanceContent"
+                    javaType="java.util.List"
+                    column="content_id" select="searchMaintenanceContentById">
+            <id column="content_id" property="contentId"/>
+            <result column="content_name" property="contentName"/>
+            <result column="is_judge" property="isJudge"/>
+            <result column="is_upload" property="isUpload"/>
+            <result column="is_remark" property="isRemark"/>
+            <result column="description" property="description"/>
+            <result column="is_deleted" property="isDeleted"/>
+            <result column="create_user_id" property="createUserId"/>
+            <result column="gmt_create" property="gmtCreate"/>
+            <result column="gmt_modified" property="gmtModified"/>
+        </collection>
+        <collection property="maintenancePhotoList" ofType="com.i2dsp.maintenance.domain.MaintenancePhoto"
+                    javaType="java.util.List"
+                    column="record_detail_id" select="searchMaintenancePhotoById">
+            <id column="photo_id" property="photoId"/>
+            <result column="record_detail_id" property="recordDetailId"/>
+            <result column="photo_path" property="photoPath"/>
+            <result column="photo_type" property="photoType"/>
+            <result column="gmt_create" property="gmtCreate"/>
+        </collection>
+    </resultMap>
+    <!--    =====================    一对多查询 RecordAndDetail   end    =================================-->
+    <select id="searchMaintenancePhotoById" parameterType="java.lang.Long" resultMap="PhotoTemplate">
+        select
+        *
+        from maintenance_photo where record_detail_id = #{record_detail_id}
+    </select>
+    <resultMap id="PhotoTemplate" type="com.i2dsp.maintenance.domain.MaintenancePhoto">
+        <id column="photo_id" property="photoId"/>
+        <result column="record_detail_id" property="recordDetailId"/>
+        <result column="photo_path" property="photoPath"/>
+        <result column="photo_type" property="photoType"/>
+        <result column="gmt_create" property="gmtCreate"/>
+    </resultMap>
+    <!--    =====================    一对多查询 DetailAndPhoto   end    =================================-->
+    <select id="searchMaintenanceContentById" parameterType="java.lang.Long" resultMap="ContentTemplate">
+        select
+        *
+        from maintenance_content where content_id = #{content_id}
+    </select>
+    <resultMap id="ContentTemplate" type="com.i2dsp.maintenance.domain.MaintenanceContent">
+        <id column="content_id" property="contentId"/>
+        <result column="content_name" property="contentName"/>
+        <result column="is_judge" property="isJudge"/>
+        <result column="is_upload" property="isUpload"/>
+        <result column="is_remark" property="isRemark"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="gmt_create" property="gmtCreate"/>
+        <result column="gmt_modified" property="gmtModified"/>
+    </resultMap>
+    <!--    =====================    一对一查询 DetailAndContent   end    =================================-->
+
+    <select id="searchRecordAndTypeByDeviceId" parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo"
+            resultMap="RecordAndTypeTemplate">
+        select
+        mr.*,
+        mt.type_name, mt.period_scope, mt.period_number, mt.remind_number, mt.description, mt.is_deleted, mt.create_user_id, mt.gmt_create as type_gmt_create, mt.gmt_modified
+        from
+        maintenance_record mr ,
+        (
+        SELECT
+        device_id ,
+        type_id,
+        max(gmt_create) as m_time
+        FROM
+        maintenance_record mr
+        where
+        mr.device_id = #{deviceId}
+        group by
+        type_id) as t
+        left join maintenance_type mt on
+        mt.type_id = t.type_id
+        where
+        t.device_id = mr.device_id
+        and t.type_id = mr.type_id
+        and t.m_time = mr.gmt_create
+    </select>
+    <resultMap id="RecordAndTypeTemplate" type="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo"
+            extends="BaseResultMap">
+        <result column="type_name" property="typeName"/>
+        <result column="period_scope" property="periodScope"/>
+        <result column="period_number" property="periodNumber"/>
+        <result column="remind_number" property="remindNumber"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="type_gmt_create" property="typeGmtCreate"/>
+        <result column="gmt_modified" property="typeGmtModified"/>
+    </resultMap>
+
+    <select id="searchRecordAndTypeByTypeId" parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo"
+            resultMap="RecordAndTypeTemplates">
+        select
+        mr.*,
+        mt.type_name, mt.period_scope, mt.period_number, mt.remind_number, mt.description, mt.is_deleted, mt.create_user_id, mt.gmt_create as type_gmt_create, mt.gmt_modified
+        from
+        maintenance_record mr ,
+        (
+        SELECT
+        device_id ,
+        type_id,
+        max(gmt_create) as m_time
+        FROM
+        maintenance_record mr
+        <where>
+            <if test="typeId != null and typeId != ''">
+                and mr.type_id = #{typeId}
+            </if>
+            <if test="staffName != null and staffName != ''">
+                and mr.staff_name = #{staffName}
+            </if>
+        </where>
+        group by
+        device_id ,
+        type_id) as t
+        left join maintenance_type mt on
+        mt.type_id = t.type_id
+        where
+        t.device_id = mr.device_id
+        and t.type_id = mr.type_id
+        and t.m_time = mr.gmt_create
+    </select>
+    <resultMap id="RecordAndTypeTemplates" type="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo"
+               extends="BaseResultMap">
+        <result column="type_name" property="typeName"/>
+        <result column="period_scope" property="periodScope"/>
+        <result column="period_number" property="periodNumber"/>
+        <result column="remind_number" property="remindNumber"/>
+        <result column="description" property="description"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="type_gmt_create" property="typeGmtCreate"/>
+        <result column="gmt_modified" property="typeGmtModified"/>
+    </resultMap>
+
+</mapper>

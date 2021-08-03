@@ -1,0 +1,88 @@
+#server:
+#  port: 20212
+#spring:
+#  application:
+#    name: I2dspMaintenanceRecord
+#  ################################   nacos   ###################################################
+##  cloud:
+##    nacos:
+##      discovery:
+##        server-addr: 210.5.30.195:8848
+##        namespace: cc8561c5-2d87-4db8-95fc-ddc0fb03e563
+##      config:
+##        #        enabled: false
+##        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+##        namespace: ${spring.cloud.nacos.discovery.namespace}
+##        file-extension: yaml
+##        prefix: I2dspMaintenanceRecord
+##  profiles:
+##    active: test
+#
+#  #################################  TIDB  ###############################################
+#  datasource:
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://192.168.188.104:4000/i2dsp_maintenance_record?useUnicode=true&useSSL=false&characterEncoding=utf8&useTimezone=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true&useServerPrepStmts=true&allowMultiQueries=true
+#    username: lianghaicong
+#    password: aRhtdL0mPtW058zjLsz5
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    #####################################  druid #####################################################
+#    initialSize: 5
+#    minIdle: 5
+#    maxActive: 20
+#    maxWait: 60000
+#    timeBetweenEvictionRunsMillis: 60000
+#    minEvictableIdleTimeMillis: 300000
+#    validationQuery: SELECT 1 FROM DUAL
+#    testWhileIdle: true
+#    testOnBorrow: false
+#    testOnReturn: false
+#    # 打开PSCache
+#    poolPreparedStatements: true
+#    #配置监控统计拦截的filters，stat:监控统计、log4j：日志记录、wall：防御sql注入
+#    #如果运行时报错  java.lang.ClassNotFoundException: org.apache.log4j.Priority
+#    #则导入 log4j 依赖即可，Maven 地址： https://mvnrepository.com/artifact/log4j/log4j
+#    filters: stat,wall,log4j,config
+#    #指定每个连接上PSCache的大小
+#    maxPoolPreparedStatementPerConnectionSize: 20
+#    #合并多个DruidDataSource的监控数据
+#    useGlobalDataSourceStat: true
+#    #通过connectProperties属性来打开mergeSql功能；慢SQL记录
+#    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+#
+######################################  mybatis-plus #####################################################
+#mybatis-plus:
+#  mapper-locations: classpath:/mapper/*.xml
+#  #实体扫描，多个package用逗号或者分号分隔
+#  typeAliasesPackage: com.i2dsp.maintenance.domain
+#  global-config:
+#    #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID";
+#    id-type: 0
+#    #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+#    field-strategy: 1
+#    #驼峰下划线转换
+#    #刷新mapper 调试神器
+#    refresh-mapper: true
+#  configuration:
+#    map-underscore-to-camel-case: true
+#    cache-enabled: false
+#    #配置JdbcTypeForNull
+#    jdbc-type-for-null: 'null'
+#
+##日志配置
+#logging:
+#  level:
+#    com.i2dsp.maintenance: debug
+#
+#########################################  图片上传  ##############################################################
+#upload:
+#  photo:
+#    sufix: .jpg,.png,.gif,.jpeg,.bmp,.tif,.pcx,.tga,.exif,.fpx,.svg,.psd,.cdr,.pcd,.dxf,.ufo,.eps,.ai,.raw,.WMF,.webp
+#    maxsize: 10240
+#
+#########################################  minio文件服务器   ##################################################
+#minio:
+#  endpoint: http://192.168.188.118:9000
+#  accessKey: i2dsp
+#  secretKey: 8qbWHmZqKQtYU4et8g0u
+#  secure: false
+#  bucketName: maintenance-record

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.i2dsp.maintenance.mapper.MaintenanceProductMapper">
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="ProductDetailResultMap" type="com.i2dsp.maintenance.domain.vo.MaintenanceProductDetail">
+        <result column="product_name" property="productName" />
+        <collection column="product_name" property="types" javaType="java.util.List" select="getTypeDetailByProductName" ofType="com.i2dsp.maintenance.domain.vo.MaintenanceTypeDetailVo" >
+        </collection>
+    </resultMap>
+
+    <resultMap id="TypeResultMap" type="com.i2dsp.maintenance.domain.vo.MaintenanceTypeDetailVo">
+        <id column="type_id" property="typeId" />
+        <result column="type_name" property="typeName" />
+        <result column="period_scope" property="periodScope" />
+        <result column="period_number" property="periodNumber" />
+        <result column="remind_number" property="remindNumber" />
+        <result column="description" property="description" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="gmt_create" property="gmtCreate" />
+        <result column="gmt_modified" property="gmtModified" />
+        <result column="allocationTime" property="allocationTime" />
+        <collection column="type_id" property="contents" javaType="java.util.List" select="getContentByTypeId" ofType="com.i2dsp.maintenance.domain.MaintenanceContent" >
+        </collection>
+    </resultMap>
+
+    <resultMap id="ContentResultMap" type="com.i2dsp.maintenance.domain.MaintenanceContent">
+        <id column="content_id" property="contentId" />
+        <result column="content_name" property="contentName" />
+        <result column="is_judge" property="isJudge" />
+        <result column="is_upload" property="isUpload" />
+        <result column="is_remark" property="isRemark" />
+        <result column="description" property="description" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="gmt_create" property="gmtCreate" />
+        <result column="gmt_modified" property="gmtModified" />
+    </resultMap>
+
+
+    <select id="getContentByTypeId" parameterType="long" resultMap="ContentResultMap">
+        SELECT mc.*
+        FROM  type_has_content thc
+        left join maintenance_content mc on thc.content_id = mc.content_id
+        WHERE thc.type_id = #{typeId}
+    </select>
+
+
+    <select id="getProductDetail"   resultMap="ProductDetailResultMap">
+        SELECT pht.product_name
+        FROM product_has_type pht
+        <where>
+            <if test="productId != null">
+              and pht.product_id = #{productId}
+            </if>
+            <if test="productName != null and productName != '' ">
+               and pht.product_name = #{productName}
+            </if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="getTypeDetailByProductName" parameterType="java.lang.String"  resultMap="TypeResultMap">
+        SELECT mt.*,MIN(pht.gmt_create) allocationTime
+        FROM product_has_type pht
+        left join maintenance_type mt on pht.type_id = mt.type_id
+        WHERE pht.product_name = #{productName}
+        group by mt.type_id
+    </select>
+
+</mapper>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.i2dsp.maintenance.mapper.MaintenanceLastRecordMapper">
+
+    <select id="searchLastRecordAndType" resultMap="LastRecordAndType"
+            parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo">
+        SELECT mlr.device_id ,mlr.type_id ,mlr.last_record_time ,mlr.staff_name ,mt.period ,mt.period_number ,mt.period_scope ,mt.remind_number ,mt.type_name
+        FROM maintenance_last_record mlr
+        left join maintenance_type mt on
+        mlr.type_id = mt.type_id
+        <where>
+            <if test="deviceId != null and deviceId != ''">
+                and mlr.device_id = #{deviceId}
+            </if>
+            <if test="typeId != null and typeId != ''">
+                and mlr.type_id = #{typeId}
+            </if>
+            <if test="staffName != null and staffName != ''">
+                and mlr.staff_name = #{staffName}
+            </if>
+            <if test="periodNumber != null and periodNumber != ''">
+                and mt.period_number = #{periodNumber}
+            </if>
+            <if test="periodScope != null and periodScope != ''">
+                and mt.period_scope = #{periodScope}
+            </if>
+        </where>
+    </select>
+    <resultMap id="LastRecordAndType" type="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo">
+        <result column="device_id" property="deviceId"/>
+        <result column="type_id" property="typeId"/>
+        <result column="last_record_time" property="gmtCreate"/>
+        <result column="staff_name" property="staffName"/>
+        <result column="period" property="period"/>
+        <result column="period_number" property="periodNumber"/>
+        <result column="period_scope" property="periodScope"/>
+        <result column="remind_number" property="remindNumber"/>
+        <result column="type_name" property="typeName"/>
+    </resultMap>
+
+    <select id="searchLastRecordAndTypeByDevice" resultMap="LastRecordAndTypes"
+            parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo">
+        select tmp.type_id, mt.period, mlr.last_record_time, mt.period_number ,mt.period_scope ,mt.remind_number, mlr.staff_name ,mlr.device_id ,mt.type_name
+        from (SELECT pht.type_id , pht.product_name
+        FROM product_has_type pht
+        where pht.product_name = #{productName}) tmp
+        left join maintenance_type mt
+        on mt.type_id = tmp.type_id
+        left join maintenance_last_record mlr
+        on mlr.type_id = tmp.type_id and mlr.device_id = #{deviceId}
+        <where>
+            <if test="periodScope != null and periodScope != ''">
+                and mt.period_scope = #{periodScope}
+            </if>
+            <if test="periodNumber != null and periodNumber != ''">
+                and mt.period_number = #{periodNumber}
+            </if>
+            <if test="staffName != null and staffName != ''">
+                and mlr.staff_name = #{staffName}
+            </if>
+            <if test="typeId != null and typeId != ''">
+                and mt.type_id = #{typeId}
+            </if>
+        </where>
+    </select>
+    <resultMap id="LastRecordAndTypes" type="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo">
+        <result column="device_id" property="deviceId"/>
+        <result column="type_id" property="typeId"/>
+        <result column="last_record_time" property="gmtCreate"/>
+        <result column="staff_name" property="staffName"/>
+        <result column="period" property="period"/>
+        <result column="period_number" property="periodNumber"/>
+        <result column="period_scope" property="periodScope"/>
+        <result column="remind_number" property="remindNumber"/>
+        <result column="type_name" property="typeName"/>
+    </resultMap>
+    
+    <select id="searchLastRecordAndTypeByAll" resultMap="LastRecordAndType"
+            parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceRecordAndTypeVo">
+        SELECT mlr.device_id ,mlr.type_id ,mlr.last_record_time ,mlr.staff_name ,mt.period ,mt.period_number ,mt.period_scope ,mt.remind_number ,mt.type_name
+        FROM maintenance_last_record mlr
+        inner join maintenance_type mt on
+        mlr.type_id = mt.type_id and UNIX_TIMESTAMP(NOW()) > (mt.period + mlr.last_record_time)/1000
+        <where>
+            <if test="periodScope != null and periodScope != ''">
+                and mt.period_scope = #{periodScope}
+            </if>
+            <if test="periodNumber != null and periodNumber != ''">
+                and mt.period_number = #{periodNumber}
+            </if>
+            <if test="staffName != null and staffName != ''">
+                and mlr.staff_name = #{staffName}
+            </if>
+            <if test="typeId != null and typeId != ''">
+                and mt.type_id = #{typeId}
+            </if>
+        </where>
+    </select>
+</mapper>

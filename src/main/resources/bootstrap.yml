@@ -1,0 +1,31 @@
+#server:
+#  port: 20212
+spring:
+  mvc:
+    servlet:
+      load-on-startup: 1
+  application:
+    name: i2dspMaintenanceRecord
+  ################################   nacos   ###################################################
+  #  本地  192.168.188.106:8848
+  #  私有云  210.5.30.195:884
+  #  私有云内部 192.168.188.121：8848
+  #   DB : 210.5.30.198
+  #   dev: 61b4ede4-148c-45fd-9693-f2e1aef00a53
+  #   prod: b70b8629-6cf3-4fac-8963-7faee0812e56
+  #   test: cc8561c5-2d87-4db8-95fc-ddc0fb03e563
+  #   sys-test: b0b6c6f-52aa-444a-a468-a996854a7574
+  ##############################################################################################
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 210.5.30.195:8848
+        namespace: cc8561c5-2d87-4db8-95fc-ddc0fb03e563
+      config:
+        #        enabled: false
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        file-extension: yaml
+        prefix: i2dspMaintenanceRecord
+  profiles:
+    active: test

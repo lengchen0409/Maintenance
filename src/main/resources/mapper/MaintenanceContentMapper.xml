@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.i2dsp.maintenance.mapper.MaintenanceContentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.i2dsp.maintenance.domain.MaintenanceContent">
+        <id column="content_id" property="contentId" />
+        <result column="content_name" property="contentName" />
+        <result column="is_judge" property="isJudge" />
+        <result column="is_upload" property="isUpload" />
+        <result column="is_remark" property="isRemark" />
+        <result column="description" property="description" />
+        <result column="is_deleted" property="isDeleted" />
+        <result column="create_user_id" property="createUserId" />
+        <result column="gmt_create" property="gmtCreate" />
+        <result column="gmt_modified" property="gmtModified" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <select id="contentList" parameterType="com.i2dsp.maintenance.domain.vo.MaintenanceContentVo" resultType="com.i2dsp.maintenance.domain.MaintenanceContent">
+        select distinct mc.*
+        from maintenance_content mc
+        left join type_has_content thc on thc.content_id = mc.content_id
+        <if test="typeId != null">
+            and thc.type_id = #{typeId}
+        </if>
+        <where>
+            mc.is_deleted = 0
+            <if test="allocationStatus != null and allocationStatus == 0">
+                and thc.id is null
+            </if>
+            <if test="allocationStatus != null and allocationStatus == 1">
+                and thc.id is not null
+            </if>
+            <if test="contentName != null and contentName != ''">
+                and mc.content_name like concat('%',#{contentName},'%')
+            </if>
+            <if test="contentId != null">
+                and mc.content_id = #{contentId}
+            </if>
+        </where>
+        order by mc.gmt_create DESC
+    </select>
+
+    <sql id="Base_Column_List">
+        content_id, content_name, is_judge, is_upload, is_remark, description, is_deleted, create_user_id, gmt_create, gmt_modified
+    </sql>
+
+</mapper>
